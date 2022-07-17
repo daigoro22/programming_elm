@@ -1,5 +1,6 @@
 module Picshare exposing (main)
 
+import Browser
 import Html exposing (Html, div, h1, h2, i, img, text)
 import Html.Attributes exposing (class, src)
 import Html.Events exposing (onClick)
@@ -18,7 +19,7 @@ type Msg
     | Unlike
 
 
-main : Html Msg
+main : Program () { url : String, caption : String, liked : Bool } Msg
 
 
 
@@ -26,7 +27,7 @@ main : Html Msg
 
 
 main =
-    view initialModel
+    Browser.sandbox { init = initialModel, view = view, update = update }
 
 
 view : { url : String, caption : String, liked : Bool } -> Html Msg
@@ -61,6 +62,16 @@ viewDetailedPhoto model =
                 Like
     in
     div [ class "detailed-photo" ] [ img [ src model.url ] [], div [ class "photo-info" ] [ div [ class "like-button" ] [ i [ class "fa fa-2x", class buttonClass, onClick msg ] [] ], h2 [ class "caption" ] [ text model.caption ] ] ]
+
+
+update : Msg -> { url : String, caption : String, liked : Bool } -> { url : String, caption : String, liked : Bool }
+update msg model =
+    case msg of
+        Like ->
+            { model | liked = True }
+
+        Unlike ->
+            { model | liked = False }
 
 
 baseUrl : String
