@@ -19,8 +19,7 @@ initialModel =
 
 
 type Msg
-    = Like
-    | Unlike
+    = ToggleLike
 
 
 main : Program () Model Msg
@@ -48,8 +47,8 @@ view model =
         ]
 
 
-viewDetailedPhoto : Model -> Html Msg
-viewDetailedPhoto model =
+viewLoveButton : Model -> Html Msg
+viewLoveButton model =
     let
         buttonClass =
             if model.liked then
@@ -57,25 +56,20 @@ viewDetailedPhoto model =
 
             else
                 "fa fa-heart-o"
-
-        msg =
-            if model.liked then
-                Unlike
-
-            else
-                Like
     in
-    div [ class "detailed-photo" ] [ img [ src model.url ] [], div [ class "photo-info" ] [ div [ class "like-button" ] [ i [ class "fa fa-2x", class buttonClass, onClick msg ] [] ], h2 [ class "caption" ] [ text model.caption ] ] ]
+    div [ class "like-button" ] [ i [ class "fa fa-2x", class buttonClass, onClick ToggleLike ] [] ]
+
+
+viewDetailedPhoto : Model -> Html Msg
+viewDetailedPhoto model =
+    div [ class "detailed-photo" ] [ img [ src model.url ] [], div [ class "photo-info" ] [ viewLoveButton model, h2 [ class "caption" ] [ text model.caption ] ] ]
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Like ->
-            { model | liked = True }
-
-        Unlike ->
-            { model | liked = False }
+        ToggleLike ->
+            { model | liked = not model.liked }
 
 
 baseUrl : String
