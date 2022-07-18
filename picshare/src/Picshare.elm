@@ -1,13 +1,13 @@
 module Picshare exposing (main)
 
 import Browser
-import Html exposing (Html, div, h1, h2, i, img, text)
-import Html.Attributes exposing (class, src)
+import Html exposing (Html, button, div, form, h1, h2, i, img, input, li, strong, text, ul)
+import Html.Attributes exposing (class, placeholder, src, type_)
 import Html.Events exposing (onClick)
 
 
 type alias Model =
-    { url : String, caption : String, liked : Bool }
+    { url : String, caption : String, liked : Bool, comments : List String, newComment : String }
 
 
 initialModel : Model
@@ -15,6 +15,8 @@ initialModel =
     { url = baseUrl ++ "1.jpg"
     , caption = "surfing"
     , liked = False
+    , comments = [ "いい波乗ってんね！" ]
+    , newComment = ""
     }
 
 
@@ -38,11 +40,7 @@ view model =
     div []
         [ div [ class "header" ] [ h1 [] [ text "Picshare" ] ]
         , div [ class "content-flow" ]
-            [ viewDetailedPhoto
-                { url = model.url
-                , caption = model.caption
-                , liked = model.liked
-                }
+            [ viewDetailedPhoto model
             ]
         ]
 
@@ -62,7 +60,27 @@ viewLoveButton model =
 
 viewDetailedPhoto : Model -> Html Msg
 viewDetailedPhoto model =
-    div [ class "detailed-photo" ] [ img [ src model.url ] [], div [ class "photo-info" ] [ viewLoveButton model, h2 [ class "caption" ] [ text model.caption ] ] ]
+    div [ class "detailed-photo" ] [ img [ src model.url ] [], div [ class "photo-info" ] [ viewLoveButton model, h2 [ class "caption" ] [ text model.caption ], viewComments model ] ]
+
+
+viewComment : String -> Html Msg
+viewComment comment =
+    li [] [ strong [] [ text "Comment:" ], text <| " " ++ comment ]
+
+
+viewCommentList : List String -> Html Msg
+viewCommentList comments =
+    case comments of
+        [] ->
+            text ""
+
+        _ ->
+            div [ class "comments" ] [ ul [] (List.map viewComment comments) ]
+
+
+viewComments : Model -> Html Msg
+viewComments model =
+    div [] [ viewCommentList model.comments, form [ class "new-comment" ] [ input [ type_ "text", placeholder "Add a comment..." ] [], button [] [ text "Save" ] ] ]
 
 
 update : Msg -> Model -> Model
