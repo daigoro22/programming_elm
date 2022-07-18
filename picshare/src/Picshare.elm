@@ -2,17 +2,22 @@ module Picshare exposing (main)
 
 import Browser
 import Html exposing (Html, button, div, form, h1, h2, i, img, input, li, strong, text, ul)
-import Html.Attributes exposing (class, placeholder, src, type_)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, disabled, placeholder, src, type_, value)
+import Html.Events exposing (onClick, onInput, onSubmit)
+
+
+type alias Id =
+    Int
 
 
 type alias Model =
-    { url : String, caption : String, liked : Bool, comments : List String, newComment : String }
+    { id : Id, url : String, caption : String, liked : Bool, comments : List String, newComment : String }
 
 
 initialModel : Model
 initialModel =
-    { url = baseUrl ++ "1.jpg"
+    { id = 1
+    , url = baseUrl ++ "1.jpg"
     , caption = "surfing"
     , liked = False
     , comments = [ "いい波乗ってんね！" ]
@@ -22,6 +27,8 @@ initialModel =
 
 type Msg
     = ToggleLike
+    | UpdateComment String
+    | SaveComment
 
 
 main : Program () Model Msg
@@ -80,7 +87,7 @@ viewCommentList comments =
 
 viewComments : Model -> Html Msg
 viewComments model =
-    div [] [ viewCommentList model.comments, form [ class "new-comment" ] [ input [ type_ "text", placeholder "Add a comment..." ] [], button [] [ text "Save" ] ] ]
+    div [] [ viewCommentList model.comments, form [ class "new-comment", onSubmit SaveComment ] [ input [ type_ "text", placeholder "Add a comment...", value model.newComment, onInput UpdateComment ] [], button [ disabled <| String.isEmpty model.newComment ] [ text "Save" ] ] ]
 
 
 update : Msg -> Model -> Model
@@ -88,6 +95,26 @@ update msg model =
     case msg of
         ToggleLike ->
             { model | liked = not model.liked }
+
+        UpdateComment comment ->
+            { model | newComment = comment }
+
+        SaveComment ->
+            saveComments model
+
+
+saveComments : Model -> Model
+saveComments model =
+    let
+        newComment =
+            String.trim model.newComment
+    in
+    case newComment of
+        "" ->
+            model
+
+        _ ->
+            { model | comments = model.comments ++ [ newComment ], newComment = "" }
 
 
 baseUrl : String
